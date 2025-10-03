@@ -28,8 +28,9 @@ function App() {
           openUrl(result.data)
         },
         {
-          highlightScanRegion: true,
-          highlightCodeOutline: true
+          highlightScanRegion: false,
+          highlightCodeOutline: false,
+          maxScansPerSecond: 3
         }
       )
       
