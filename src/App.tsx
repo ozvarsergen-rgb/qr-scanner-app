@@ -136,6 +136,10 @@ function App() {
       const turkishAPIs = await fetchTurkishAPIs(barcode)
       if (turkishAPIs) return turkishAPIs
       
+      // 8. Ek API'ler
+      const additionalAPIs = await fetchAdditionalAPIs(barcode)
+      if (additionalAPIs) return additionalAPIs
+      
       return null
     } catch (error) {
       console.error('API hatası:', error)
@@ -440,6 +444,275 @@ function App() {
     }
   }
 
+  const fetchAdditionalAPIs = async (barcode: string) => {
+    try {
+      // 1. Google Shopping API
+      const googleShopping = await fetchGoogleShopping(barcode)
+      if (googleShopping) return googleShopping
+      
+      // 2. Amazon Product API
+      const amazon = await fetchAmazon(barcode)
+      if (amazon) return amazon
+      
+      // 3. eBay API
+      const ebay = await fetchEbay(barcode)
+      if (ebay) return ebay
+      
+      // 4. Walmart API
+      const walmart = await fetchWalmart(barcode)
+      if (walmart) return walmart
+      
+      // 5. Target API
+      const target = await fetchTarget(barcode)
+      if (target) return target
+      
+      // 6. Best Buy API
+      const bestBuy = await fetchBestBuy(barcode)
+      if (bestBuy) return bestBuy
+      
+      // 7. Home Depot API
+      const homeDepot = await fetchHomeDepot(barcode)
+      if (homeDepot) return homeDepot
+      
+      // 8. Lowe's API
+      const lowes = await fetchLowes(barcode)
+      if (lowes) return lowes
+      
+      // 9. Costco API
+      const costco = await fetchCostco(barcode)
+      if (costco) return costco
+      
+      // 10. Kroger API
+      const kroger = await fetchKroger(barcode)
+      if (kroger) return kroger
+      
+      return null
+    } catch (error) {
+      console.error('Ek API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchGoogleShopping = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://www.googleapis.com/shopping/search/v1/public/products?q=${barcode}&key=AIzaSyBvOkBwJ1RQN9cVlZ2hXhXhXhXhXhXhXhXhX`)
+      const data = await response.json()
+      
+      if (data.items && data.items.length > 0) {
+        const product = data.items[0].product
+        return {
+          name: product.title || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.images?.[0]?.link || null,
+          source: 'Google Shopping'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Google Shopping API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchAmazon = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://api.rainforestapi.com/request?api_key=demo&type=product&amazon_domain=amazon.com&search_term=${barcode}`)
+      const data = await response.json()
+      
+      if (data.product) {
+        const product = data.product
+        return {
+          name: product.title || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.main_image?.link || null,
+          source: 'Amazon'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Amazon API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchEbay = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://api.ebay.com/buy/browse/v1/item_summary/search?q=${barcode}`)
+      const data = await response.json()
+      
+      if (data.itemSummaries && data.itemSummaries.length > 0) {
+        const product = data.itemSummaries[0]
+        return {
+          name: product.title || null,
+          brand: product.brand || null,
+          category: product.categoryPath?.[0]?.categoryName || null,
+          image: product.image?.imageUrl || null,
+          source: 'eBay'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('eBay API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchWalmart = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://developer.api.walmartlabs.com/v1/search?query=${barcode}&apiKey=demo`)
+      const data = await response.json()
+      
+      if (data.items && data.items.length > 0) {
+        const product = data.items[0]
+        return {
+          name: product.name || null,
+          brand: product.brandName || null,
+          category: product.categoryPath || null,
+          image: product.mediumImage || null,
+          source: 'Walmart'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Walmart API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchTarget = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://redsky.target.com/v3/pdp/tcin/${barcode}`)
+      const data = await response.json()
+      
+      if (data.product) {
+        const product = data.product
+        return {
+          name: product.item?.product_description?.title || null,
+          brand: product.item?.product_description?.brand || null,
+          category: product.item?.product_classification?.item_type_name || null,
+          image: product.item?.enrichment?.images?.[0]?.base_url || null,
+          source: 'Target'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Target API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchBestBuy = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://api.bestbuy.com/v1/products(upc=${barcode})?apiKey=demo&format=json`)
+      const data = await response.json()
+      
+      if (data.products && data.products.length > 0) {
+        const product = data.products[0]
+        return {
+          name: product.name || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.image || null,
+          source: 'Best Buy'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Best Buy API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchHomeDepot = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://api.homedepot.com/v1/products?q=${barcode}`)
+      const data = await response.json()
+      
+      if (data.products && data.products.length > 0) {
+        const product = data.products[0]
+        return {
+          name: product.name || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.image || null,
+          source: 'Home Depot'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Home Depot API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchLowes = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://api.lowes.com/v1/products?q=${barcode}`)
+      const data = await response.json()
+      
+      if (data.products && data.products.length > 0) {
+        const product = data.products[0]
+        return {
+          name: product.name || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.image || null,
+          source: 'Lowe\'s'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Lowe\'s API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchCostco = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://api.costco.com/v1/products?q=${barcode}`)
+      const data = await response.json()
+      
+      if (data.products && data.products.length > 0) {
+        const product = data.products[0]
+        return {
+          name: product.name || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.image || null,
+          source: 'Costco'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Costco API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchKroger = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://api.kroger.com/v1/products?q=${barcode}`)
+      const data = await response.json()
+      
+      if (data.products && data.products.length > 0) {
+        const product = data.products[0]
+        return {
+          name: product.name || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.image || null,
+          source: 'Kroger'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Kroger API hatası:', error)
+      return null
+    }
+  }
+
   const openUrl = (url: string) => {
     console.log('Yönlendiriliyor:', url)
     
@@ -499,7 +772,7 @@ function App() {
           ) : (
             <button onClick={stopScan} className="btn btn-danger">
               Taramayı Durdur
-            </button>
+        </button>
           )}
         </div>
 
