@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { BrowserMultiFormatReader, NotFoundException } from '@zxing/library'
+import QrScanner from 'qr-scanner'
 import { QrCode, Camera, History, Copy, ExternalLink } from 'lucide-react'
 import './App.css'
 
@@ -15,7 +15,7 @@ function App() {
   const [scanResults, setScanResults] = useState<ScanResult[]>([])
   const [currentResult, setCurrentResult] = useState<string>('')
   const [error, setError] = useState<string>('')
-  const readerRef = useRef<BrowserMultiFormatReader | null>(null)
+  const qrScannerRef = useRef<QrScanner | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
@@ -33,12 +33,9 @@ function App() {
       }
     }
 
-    // Initialize ZXing reader
-    readerRef.current = new BrowserMultiFormatReader()
-
     return () => {
-      if (readerRef.current) {
-        readerRef.current.reset()
+      if (qrScannerRef.current) {
+        qrScannerRef.current.destroy()
       }
     }
   }, [])
@@ -78,24 +75,12 @@ function App() {
         return
       }
       
-      // Kamera izni iste
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          facingMode: { ideal: 'environment' }, // Arka kamera
-          width: { ideal: 1280, max: 1920 },
-          height: { ideal: 720, max: 1080 }
-        } 
-      })
-      
-      // Video elementine stream'i bağla
-      videoRef.current.srcObject = stream
-      await videoRef.current.play()
-      
-      // QR kod tarama başlat
-      await readerRef.current!.decodeFromVideoDevice(null, videoRef.current, (result, error) => {
-        if (result) {
-          console.log('QR kod okundu:', result.getText())
-          const text = result.getText()
+      // QR Scanner'ı başlat
+      qrScannerRef.current = new QrScanner(
+        videoRef.current,
+        (result) => {
+          console.log('QR kod okundu:', result.data)
+          const text = result.data
           const newResult: ScanResult = {
             id: Date.now().toString(),
             text,
@@ -111,13 +96,20 @@ function App() {
           })
           
           setIsScanning(false)
-          readerRef.current?.reset()
-          stream.getTracks().forEach(track => track.stop())
+          qrScannerRef.current?.stop()
+        },
+        {
+          onDecodeError: (error) => {
+            // QR kod bulunamadı, taramaya devam et
+            console.log('QR kod bulunamadı:', error)
+          },
+          highlightScanRegion: true,
+          highlightCodeOutline: true,
+          maxScansPerSecond: 5
         }
-        if (error && !(error instanceof NotFoundException)) {
-          console.log('QR kod bulunamadı:', error)
-        }
-      })
+      )
+      
+      await qrScannerRef.current.start()
       
     } catch (err) {
       console.error('Kamera hatası:', err)
@@ -141,15 +133,8 @@ function App() {
   }
 
   const stopScanning = () => {
-    if (readerRef.current) {
-      readerRef.current.reset()
-    }
-    
-    // Video stream'i durdur
-    if (videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream
-      stream.getTracks().forEach(track => track.stop())
-      videoRef.current.srcObject = null
+    if (qrScannerRef.current) {
+      qrScannerRef.current.stop()
     }
     
     setIsScanning(false)
