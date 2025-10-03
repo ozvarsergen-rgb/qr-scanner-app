@@ -24,10 +24,8 @@ function App() {
           setIsScanning(false)
           scannerRef.current?.stop()
           
-          // Hemen yönlendir
-          setTimeout(() => {
-            openUrl(result.data)
-          }, 100)
+          // Hemen yönlendir - gecikme yok
+          openUrl(result.data)
         },
         {
           highlightScanRegion: true,
@@ -63,13 +61,32 @@ function App() {
     
     console.log('Temizlenmiş URL:', cleanUrl)
     
-    // Basit yönlendirme - sadece location.href kullan
+    // Güçlü yönlendirme - birden fazla yöntem
     try {
-      window.location.href = cleanUrl
-    } catch (error) {
-      console.error('URL açma hatası:', error)
-      // Alternatif: kullanıcıya URL'yi göster
-      alert(`QR kod içeriği: ${url}\n\nBu URL'yi manuel olarak açabilirsiniz.`)
+      // Yöntem 1: location.replace (geri butonu çalışmaz)
+      window.location.replace(cleanUrl)
+    } catch (error1) {
+      console.log('location.replace failed, trying location.href')
+      try {
+        // Yöntem 2: location.href
+        window.location.href = cleanUrl
+      } catch (error2) {
+        console.log('location.href failed, trying location.assign')
+        try {
+          // Yöntem 3: location.assign
+          window.location.assign(cleanUrl)
+        } catch (error3) {
+          console.log('location.assign failed, trying window.open')
+          try {
+            // Yöntem 4: window.open
+            window.open(cleanUrl, '_self')
+          } catch (error4) {
+            console.error('Tüm yönlendirme yöntemleri başarısız:', error4)
+            // Son çare: kullanıcıya URL'yi göster
+            alert(`QR kod içeriği: ${url}\n\nBu URL'yi kopyalayıp tarayıcıya yapıştırabilirsiniz.`)
+          }
+        }
+      }
     }
   }
 
@@ -110,13 +127,6 @@ function App() {
             <h3>Okunan QR Kod:</h3>
             <p>{result}</p>
             <p className="success">Yönlendiriliyor...</p>
-            <button 
-              onClick={() => openUrl(result)} 
-              className="btn btn-primary"
-              style={{marginTop: '10px'}}
-            >
-              Manuel Aç
-            </button>
           </div>
         )}
       </div>
