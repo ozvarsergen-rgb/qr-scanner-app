@@ -24,8 +24,10 @@ function App() {
           setIsScanning(false)
           scannerRef.current?.stop()
           
-          // Otomatik aç
-          openUrl(result.data)
+          // Hemen yönlendir
+          setTimeout(() => {
+            openUrl(result.data)
+          }, 500)
         },
         {
           highlightScanRegion: true,
@@ -50,13 +52,32 @@ function App() {
 
   const openUrl = (url: string) => {
     try {
+      console.log('Yönlendiriliyor:', url)
       let cleanUrl = url.trim()
-      if (!cleanUrl.startsWith('http')) {
+      
+      // URL kontrolü
+      if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
         cleanUrl = 'https://' + cleanUrl
       }
-      window.open(cleanUrl, '_blank')
+      
+      console.log('Temizlenmiş URL:', cleanUrl)
+      
+      // Yönlendirme - birden fazla yöntem dene
+      try {
+        // Yöntem 1: window.open
+        const newWindow = window.open(cleanUrl, '_blank', 'noopener,noreferrer')
+        if (!newWindow) {
+          throw new Error('Popup blocked')
+        }
+      } catch (error) {
+        console.log('Popup blocked, trying location.href')
+        // Yöntem 2: location.href
+        window.location.href = cleanUrl
+      }
+      
     } catch (error) {
       console.error('URL açma hatası:', error)
+      alert('URL açılamadı: ' + url)
     }
   }
 
