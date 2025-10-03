@@ -60,20 +60,20 @@ function App() {
     
     console.log('Temizlenmiş URL:', cleanUrl)
     
-    // Aynı sekmede açma - geri butonu çalışır
+    // Güvenli yönlendirme - geri butonu çalışır
     try {
-      // Yöntem 1: location.href (geri butonu çalışır)
-      window.location.href = cleanUrl
+      // Yöntem 1: location.assign (geri butonu çalışır)
+      window.location.assign(cleanUrl)
     } catch (error1) {
-      console.log('location.href failed, trying location.assign')
+      console.log('location.assign failed, trying location.href')
       try {
-        // Yöntem 2: location.assign (geri butonu çalışır)
-        window.location.assign(cleanUrl)
+        // Yöntem 2: location.href (geri butonu çalışır)
+        window.location.href = cleanUrl
       } catch (error2) {
-        console.log('location.assign failed, trying location.replace')
+        console.log('location.href failed, trying window.open')
         try {
-          // Yöntem 3: location.replace (geri butonu çalışmaz)
-          window.location.replace(cleanUrl)
+          // Yöntem 3: window.open (yeni sekmede aç)
+          window.open(cleanUrl, '_blank', 'noopener,noreferrer')
         } catch (error3) {
           console.error('Tüm yönlendirme yöntemleri başarısız:', error3)
           // Son çare: kullanıcıya URL'yi göster
