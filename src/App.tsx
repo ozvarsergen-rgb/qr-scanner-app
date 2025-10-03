@@ -109,7 +109,10 @@ function App() {
           onDecodeError: (error) => {
             // QR kod bulunamadı, taramaya devam et
             console.log('QR kod bulunamadı:', error)
-          }
+          },
+          highlightScanRegion: true,
+          highlightCodeOutline: true,
+          maxScansPerSecond: 5
         }
       )
       
