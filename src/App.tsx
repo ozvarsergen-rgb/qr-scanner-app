@@ -43,6 +43,8 @@ function App() {
   const detectContentType = (text: string): ScanResult['type'] => {
     if (text.startsWith('http://') || text.startsWith('https://')) {
       return 'url'
+    } else if (text.includes('www.') || text.includes('.com') || text.includes('.org') || text.includes('.net')) {
+      return 'url'
     } else if (text.includes('@') && text.includes('.')) {
       return 'email'
     } else if (text.startsWith('tel:') || /^\+?[\d\s\-\(\)]+$/.test(text)) {
@@ -151,7 +153,21 @@ function App() {
   }
 
   const openUrl = (url: string) => {
-    window.open(url, '_blank')
+    try {
+      // URL'yi temizle ve doğrula
+      let cleanUrl = url.trim()
+      
+      // http:// veya https:// yoksa ekle
+      if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+        cleanUrl = 'https://' + cleanUrl
+      }
+      
+      // URL'yi aç
+      window.open(cleanUrl, '_blank', 'noopener,noreferrer')
+    } catch (error) {
+      console.error('URL açma hatası:', error)
+      alert('URL açılamadı: ' + url)
+    }
   }
 
   const clearHistory = () => {
@@ -234,7 +250,7 @@ function App() {
                     <Copy size={16} />
                     Kopyala
                   </button>
-                  {currentResult.startsWith('http') && (
+                  {(currentResult.startsWith('http') || currentResult.includes('www.') || currentResult.includes('.com')) && (
                     <button 
                       className="action-button"
                       onClick={() => openUrl(currentResult)}
@@ -284,7 +300,7 @@ function App() {
                       >
                         <Copy size={14} />
                       </button>
-                      {result.text.startsWith('http') && (
+                      {(result.text.startsWith('http') || result.text.includes('www.') || result.text.includes('.com')) && (
                         <button 
                           className="action-button small"
                           onClick={() => openUrl(result.text)}
