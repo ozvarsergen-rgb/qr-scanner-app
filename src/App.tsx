@@ -85,7 +85,12 @@ function App() {
       const productInfo = await getProductInfo(codeText)
       
       if (productInfo) {
-        alert(`📦 Ürün Bulundu!\n\nÜrün: ${productInfo.name}\nMarka: ${productInfo.brand}\nKategori: ${productInfo.category}`)
+        const name = productInfo.name || 'Bilinmeyen Ürün'
+        const brand = productInfo.brand || 'Bilinmeyen Marka'
+        const category = productInfo.category || 'Bilinmeyen Kategori'
+        const source = productInfo.source || 'Bilinmeyen Kaynak'
+        
+        alert(`📦 Ürün Bulundu!\n\nÜrün: ${name}\nMarka: ${brand}\nKategori: ${category}\n\nKaynak: ${source}`)
       } else {
         alert(`📦 Barkod Okundu!\n\nKod: ${codeText}\nFormat: ${formatName}\n\nÜrün bilgileri bulunamadı.`)
       }
@@ -97,22 +102,87 @@ function App() {
 
   const getProductInfo = async (barcode: string) => {
     try {
-      // Open Food Facts API (ücretsiz)
+      // 1. Open Food Facts API (ücretsiz)
+      const openFoodFacts = await fetchOpenFoodFacts(barcode)
+      if (openFoodFacts) return openFoodFacts
+      
+      // 2. Barcode Lookup API (ücretsiz)
+      const barcodeLookup = await fetchBarcodeLookup(barcode)
+      if (barcodeLookup) return barcodeLookup
+      
+      // 3. UPC Database API (ücretsiz)
+      const upcDatabase = await fetchUPCDatabase(barcode)
+      if (upcDatabase) return upcDatabase
+      
+      return null
+    } catch (error) {
+      console.error('API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchOpenFoodFacts = async (barcode: string) => {
+    try {
       const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`)
       const data = await response.json()
       
       if (data.status === 1 && data.product) {
         const product = data.product
         return {
-          name: product.product_name || 'Bilinmeyen Ürün',
-          brand: product.brands || 'Bilinmeyen Marka',
-          category: product.categories || 'Bilinmeyen Kategori',
-          image: product.image_url || null
+          name: product.product_name || null,
+          brand: product.brands || null,
+          category: product.categories || null,
+          image: product.image_url || null,
+          source: 'Open Food Facts'
         }
       }
       return null
     } catch (error) {
-      console.error('API hatası:', error)
+      console.error('Open Food Facts API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchBarcodeLookup = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://api.barcodelookup.com/v3/products?barcode=${barcode}&formatted=y&key=demo`)
+      const data = await response.json()
+      
+      if (data.products && data.products.length > 0) {
+        const product = data.products[0]
+        return {
+          name: product.title || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.images?.[0] || null,
+          source: 'Barcode Lookup'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Barcode Lookup API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchUPCDatabase = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`)
+      const data = await response.json()
+      
+      if (data.items && data.items.length > 0) {
+        const product = data.items[0]
+        return {
+          name: product.title || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.images?.[0] || null,
+          source: 'UPC Database'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('UPC Database API hatası:', error)
       return null
     }
   }
