@@ -40,12 +40,12 @@ h1 {
 .video-wrapper {
   position: relative;
   width: 100%;
-  max-width: 400px;
+  max-width: 450px;
   margin: 0 auto 30px;
   border-radius: 15px;
   overflow: hidden;
   background: #f8f9fa;
-  min-height: 500px;
+  min-height: 600px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -79,7 +79,7 @@ h1 {
 }
 
 .placeholder p {
-  margin-top: 150px;
+  margin-top: 200px;
   font-size: 1rem;
   color: #555;
   font-weight: 500;
@@ -170,8 +170,8 @@ h1 {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 200px;
-  height: 200px;
+  width: 150px;
+  height: 150px;
   border: 2px dashed #667eea;
   border-radius: 15px;
   transform: translate(-50%, -50%);
@@ -216,17 +216,17 @@ h1 {
   }
   
   .video-wrapper {
-    min-height: 450px;
+    min-height: 550px;
     margin-bottom: 20px;
   }
   
   .video-wrapper::before {
-    width: 150px;
-    height: 150px;
+    width: 120px;
+    height: 120px;
   }
   
   .placeholder p {
-    margin-top: 120px;
+    margin-top: 180px;
     font-size: 0.9rem;
   }
   
