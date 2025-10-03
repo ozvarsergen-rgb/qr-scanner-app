@@ -40,12 +40,12 @@ h1 {
 .video-wrapper {
   position: relative;
   width: 100%;
-  max-width: 450px;
+  max-width: 500px;
   margin: 0 auto 30px;
   border-radius: 15px;
   overflow: hidden;
   background: #f8f9fa;
-  min-height: 600px;
+  min-height: 700px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -79,7 +79,7 @@ h1 {
 }
 
 .placeholder p {
-  margin-top: 200px;
+  margin-top: 250px;
   font-size: 1rem;
   color: #555;
   font-weight: 500;
@@ -216,7 +216,7 @@ h1 {
   }
   
   .video-wrapper {
-    min-height: 550px;
+    min-height: 650px;
     margin-bottom: 20px;
   }
   
@@ -226,7 +226,7 @@ h1 {
   }
   
   .placeholder p {
-    margin-top: 180px;
+    margin-top: 220px;
     font-size: 0.9rem;
   }
   
