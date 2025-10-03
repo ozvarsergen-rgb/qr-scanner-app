@@ -76,13 +76,20 @@ h1 {
   font-size: 1.1rem;
   padding: 20px;
   text-align: center;
+  z-index: 1;
 }
 
 .placeholder p {
-  margin-top: 120px;
+  position: absolute;
+  top: 70%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
   font-size: 1rem;
   color: #555;
   font-weight: 500;
+  z-index: 1;
+  white-space: nowrap;
 }
 
 .controls {
@@ -175,7 +182,7 @@ h1 {
   border: 2px dashed #667eea;
   border-radius: 15px;
   transform: translate(-50%, -50%);
-  z-index: 2;
+  z-index: 3;
   pointer-events: none;
   animation: pulse 2s infinite;
 }
@@ -226,7 +233,7 @@ h1 {
   }
   
   .placeholder p {
-    margin-top: 100px;
+    top: 65%;
     font-size: 0.9rem;
   }
   
