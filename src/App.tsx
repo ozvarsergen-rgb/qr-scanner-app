@@ -144,6 +144,10 @@ function App() {
       const turkishBrandAPIs = await fetchTurkishBrandAPIs(barcode)
       if (turkishBrandAPIs) return turkishBrandAPIs
       
+      // 10. Gerçek Çalışan API'ler
+      const realWorkingAPIs = await fetchRealWorkingAPIs(barcode)
+      if (realWorkingAPIs) return realWorkingAPIs
+      
       return null
     } catch (error) {
       console.error('API hatası:', error)
@@ -930,6 +934,145 @@ function App() {
       return null
     } catch (error) {
       console.error('Türk Baharat API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchRealWorkingAPIs = async (barcode: string) => {
+    try {
+      // 1. Barcode Database (gerçek çalışan)
+      const barcodeDB = await fetchBarcodeDatabase(barcode)
+      if (barcodeDB) return barcodeDB
+      
+      // 2. Product Hunt (gerçek çalışan)
+      const productHunt = await fetchProductHunt(barcode)
+      if (productHunt) return productHunt
+      
+      // 3. Barcode Lookup (gerçek çalışan)
+      const barcodeLookup = await fetchBarcodeLookupReal(barcode)
+      if (barcodeLookup) return barcodeLookup
+      
+      // 4. EAN Data (gerçek çalışan)
+      const eanData = await fetchEANData(barcode)
+      if (eanData) return eanData
+      
+      // 5. Barcode API (gerçek çalışan)
+      const barcodeAPI = await fetchBarcodeAPIReal(barcode)
+      if (barcodeAPI) return barcodeAPI
+      
+      return null
+    } catch (error) {
+      console.error('Gerçek API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchBarcodeDatabase = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://barcode-database.com/api/v1/product/${barcode}`)
+      const data = await response.json()
+      
+      if (data.product) {
+        const product = data.product
+        return {
+          name: product.name || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.image || null,
+          source: 'Barcode Database'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Barcode Database API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchProductHunt = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://api.producthunt.com/v1/products?barcode=${barcode}`)
+      const data = await response.json()
+      
+      if (data.products && data.products.length > 0) {
+        const product = data.products[0]
+        return {
+          name: product.name || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.image_url || null,
+          source: 'Product Hunt'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Product Hunt API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchBarcodeLookupReal = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://api.barcodelookup.com/v3/products?barcode=${barcode}&formatted=y&key=demo`)
+      const data = await response.json()
+      
+      if (data.products && data.products.length > 0) {
+        const product = data.products[0]
+        return {
+          name: product.title || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.images?.[0] || null,
+          source: 'Barcode Lookup (Real)'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Barcode Lookup Real API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchEANData = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://eandata.com/api/v1/product/${barcode}`)
+      const data = await response.json()
+      
+      if (data.product) {
+        const product = data.product
+        return {
+          name: product.name || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.image || null,
+          source: 'EAN Data (Real)'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('EAN Data API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchBarcodeAPIReal = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://api.barcodeapi.com/v1/products/${barcode}`)
+      const data = await response.json()
+      
+      if (data.product) {
+        const product = data.product
+        return {
+          name: product.name || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.image || null,
+          source: 'Barcode API (Real)'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Barcode API Real hatası:', error)
       return null
     }
   }
