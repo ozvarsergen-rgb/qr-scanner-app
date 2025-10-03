@@ -40,12 +40,12 @@ h1 {
 .video-wrapper {
   position: relative;
   width: 100%;
-  max-width: 500px;
-  margin: 0 auto 30px;
+  max-width: 400px;
+  margin: 0 auto;
   border-radius: 15px;
   overflow: hidden;
   background: #f8f9fa;
-  min-height: 700px;
+  min-height: 300px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -62,27 +62,17 @@ h1 {
   z-index: 1;
 }
 
-.placeholder {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #666;
-  font-size: 1.1rem;
-  padding: 20px;
+.instruction-text {
   text-align: center;
+  margin: 20px 0;
+  padding: 0 20px;
 }
 
-.placeholder p {
-  margin-top: 250px;
+.instruction-text p {
   font-size: 1rem;
   color: #555;
   font-weight: 500;
+  margin: 0;
 }
 
 .controls {
@@ -216,7 +206,7 @@ h1 {
   }
   
   .video-wrapper {
-    min-height: 650px;
+    min-height: 250px;
     margin-bottom: 20px;
   }
   
@@ -225,8 +215,7 @@ h1 {
     height: 120px;
   }
   
-  .placeholder p {
-    margin-top: 220px;
+  .instruction-text p {
     font-size: 0.9rem;
   }
   

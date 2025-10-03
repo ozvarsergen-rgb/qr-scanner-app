@@ -90,12 +90,13 @@ function App() {
         
         <div className="video-wrapper">
           <video ref={videoRef} className="video" />
-          {!isScanning && (
-            <div className="placeholder">
-              <p>QR kodu okumak için başlat butonuna basın</p>
-            </div>
-          )}
         </div>
+        
+        {!isScanning && (
+          <div className="instruction-text">
+            <p>QR kodu okumak için başlat butonuna basın</p>
+          </div>
+        )}
 
         <div className="controls">
           {!isScanning ? (
