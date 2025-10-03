@@ -45,7 +45,7 @@ h1 {
   border-radius: 15px;
   overflow: hidden;
   background: #f8f9fa;
-  min-height: 400px;
+  min-height: 500px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -76,20 +76,13 @@ h1 {
   font-size: 1.1rem;
   padding: 20px;
   text-align: center;
-  z-index: 1;
 }
 
 .placeholder p {
-  position: absolute;
-  top: 70%;
-  left: 50%;
-  transform: translateX(-50%);
-  margin: 0;
+  margin-top: 150px;
   font-size: 1rem;
   color: #555;
   font-weight: 500;
-  z-index: 1;
-  white-space: nowrap;
 }
 
 .controls {
@@ -223,7 +216,7 @@ h1 {
   }
   
   .video-wrapper {
-    min-height: 350px;
+    min-height: 450px;
     margin-bottom: 20px;
   }
   
@@ -233,7 +226,7 @@ h1 {
   }
   
   .placeholder p {
-    top: 65%;
+    margin-top: 120px;
     font-size: 0.9rem;
   }
   
