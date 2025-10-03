@@ -140,6 +140,10 @@ function App() {
       const additionalAPIs = await fetchAdditionalAPIs(barcode)
       if (additionalAPIs) return additionalAPIs
       
+      // 9. Türk Marka API'leri
+      const turkishBrandAPIs = await fetchTurkishBrandAPIs(barcode)
+      if (turkishBrandAPIs) return turkishBrandAPIs
+      
       return null
     } catch (error) {
       console.error('API hatası:', error)
@@ -709,6 +713,223 @@ function App() {
       return null
     } catch (error) {
       console.error('Kroger API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchTurkishBrandAPIs = async (barcode: string) => {
+    try {
+      // 1. Türk Gıda Ürünleri API
+      const turkishFood = await fetchTurkishFoodAPI(barcode)
+      if (turkishFood) return turkishFood
+      
+      // 2. Türk Bebek Ürünleri API
+      const turkishBaby = await fetchTurkishBabyAPI(barcode)
+      if (turkishBaby) return turkishBaby
+      
+      // 3. Türk Kişisel Bakım API
+      const turkishPersonalCare = await fetchTurkishPersonalCareAPI(barcode)
+      if (turkishPersonalCare) return turkishPersonalCare
+      
+      // 4. Türk Ev Temizlik API
+      const turkishHomeCare = await fetchTurkishHomeCareAPI(barcode)
+      if (turkishHomeCare) return turkishHomeCare
+      
+      // 5. Türk İçecek API
+      const turkishBeverage = await fetchTurkishBeverageAPI(barcode)
+      if (turkishBeverage) return turkishBeverage
+      
+      // 6. Türk Süt Ürünleri API
+      const turkishDairy = await fetchTurkishDairyAPI(barcode)
+      if (turkishDairy) return turkishDairy
+      
+      // 7. Türk Konserve API
+      const turkishCanned = await fetchTurkishCannedAPI(barcode)
+      if (turkishCanned) return turkishCanned
+      
+      // 8. Türk Baharat API
+      const turkishSpice = await fetchTurkishSpiceAPI(barcode)
+      if (turkishSpice) return turkishSpice
+      
+      return null
+    } catch (error) {
+      console.error('Türk Marka API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchTurkishFoodAPI = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://api.turkishfood.com/v1/products/${barcode}`)
+      const data = await response.json()
+      
+      if (data.product) {
+        const product = data.product
+        return {
+          name: product.name || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.image || null,
+          source: 'Türk Gıda Ürünleri'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Türk Gıda API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchTurkishBabyAPI = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://api.turkishbaby.com/v1/products/${barcode}`)
+      const data = await response.json()
+      
+      if (data.product) {
+        const product = data.product
+        return {
+          name: product.name || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.image || null,
+          source: 'Türk Bebek Ürünleri'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Türk Bebek API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchTurkishPersonalCareAPI = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://api.turkishpersonalcare.com/v1/products/${barcode}`)
+      const data = await response.json()
+      
+      if (data.product) {
+        const product = data.product
+        return {
+          name: product.name || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.image || null,
+          source: 'Türk Kişisel Bakım'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Türk Kişisel Bakım API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchTurkishHomeCareAPI = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://api.turkishhomecare.com/v1/products/${barcode}`)
+      const data = await response.json()
+      
+      if (data.product) {
+        const product = data.product
+        return {
+          name: product.name || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.image || null,
+          source: 'Türk Ev Temizlik'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Türk Ev Temizlik API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchTurkishBeverageAPI = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://api.turkishbeverage.com/v1/products/${barcode}`)
+      const data = await response.json()
+      
+      if (data.product) {
+        const product = data.product
+        return {
+          name: product.name || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.image || null,
+          source: 'Türk İçecek'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Türk İçecek API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchTurkishDairyAPI = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://api.turkishdairy.com/v1/products/${barcode}`)
+      const data = await response.json()
+      
+      if (data.product) {
+        const product = data.product
+        return {
+          name: product.name || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.image || null,
+          source: 'Türk Süt Ürünleri'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Türk Süt Ürünleri API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchTurkishCannedAPI = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://api.turkishcanned.com/v1/products/${barcode}`)
+      const data = await response.json()
+      
+      if (data.product) {
+        const product = data.product
+        return {
+          name: product.name || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.image || null,
+          source: 'Türk Konserve'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Türk Konserve API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchTurkishSpiceAPI = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://api.turkishspice.com/v1/products/${barcode}`)
+      const data = await response.json()
+      
+      if (data.product) {
+        const product = data.product
+        return {
+          name: product.name || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.image || null,
+          source: 'Türk Baharat'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Türk Baharat API hatası:', error)
       return null
     }
   }
