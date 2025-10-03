@@ -27,7 +27,7 @@ function App() {
           // Hemen yönlendir
           setTimeout(() => {
             openUrl(result.data)
-          }, 500)
+          }, 100)
         },
         {
           highlightScanRegion: true,
@@ -51,33 +51,25 @@ function App() {
   }
 
   const openUrl = (url: string) => {
+    console.log('Yönlendiriliyor:', url)
+    
+    // URL'yi temizle
+    let cleanUrl = url.trim()
+    
+    // URL kontrolü ve düzeltme
+    if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+      cleanUrl = 'https://' + cleanUrl
+    }
+    
+    console.log('Temizlenmiş URL:', cleanUrl)
+    
+    // Basit yönlendirme - sadece location.href kullan
     try {
-      console.log('Yönlendiriliyor:', url)
-      let cleanUrl = url.trim()
-      
-      // URL kontrolü
-      if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
-        cleanUrl = 'https://' + cleanUrl
-      }
-      
-      console.log('Temizlenmiş URL:', cleanUrl)
-      
-      // Yönlendirme - birden fazla yöntem dene
-      try {
-        // Yöntem 1: window.open
-        const newWindow = window.open(cleanUrl, '_blank', 'noopener,noreferrer')
-        if (!newWindow) {
-          throw new Error('Popup blocked')
-        }
-      } catch (error) {
-        console.log('Popup blocked, trying location.href')
-        // Yöntem 2: location.href
-        window.location.href = cleanUrl
-      }
-      
+      window.location.href = cleanUrl
     } catch (error) {
       console.error('URL açma hatası:', error)
-      alert('URL açılamadı: ' + url)
+      // Alternatif: kullanıcıya URL'yi göster
+      alert(`QR kod içeriği: ${url}\n\nBu URL'yi manuel olarak açabilirsiniz.`)
     }
   }
 
@@ -117,7 +109,14 @@ function App() {
           <div className="result">
             <h3>Okunan QR Kod:</h3>
             <p>{result}</p>
-            <p className="success">QR kod otomatik olarak açıldı!</p>
+            <p className="success">Yönlendiriliyor...</p>
+            <button 
+              onClick={() => openUrl(result)} 
+              className="btn btn-primary"
+              style={{marginTop: '10px'}}
+            >
+              Manuel Aç
+            </button>
           </div>
         )}
       </div>
