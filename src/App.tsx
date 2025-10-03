@@ -69,8 +69,8 @@ function App() {
     setIsScanning(false)
   }
 
-  const showBarcodeInfo = (codeText: string, format: string) => {
-    // Barkod bilgilerini göster
+  const showBarcodeInfo = async (codeText: string, format: string) => {
+    // Barkod format bilgileri
     const barcodeInfo = {
       'EAN_13': 'Ürün Barkodu (EAN-13)',
       'UPC_A': 'Ürün Barkodu (UPC-A)', 
@@ -80,7 +80,41 @@ function App() {
     
     const formatName = barcodeInfo[format as keyof typeof barcodeInfo] || format
     
-    alert(`📦 Barkod Okundu!\n\nKod: ${codeText}\nFormat: ${formatName}\n\nBu barkod ürün bilgilerini içerir.`)
+    try {
+      // Ürün bilgilerini API'den al
+      const productInfo = await getProductInfo(codeText)
+      
+      if (productInfo) {
+        alert(`📦 Ürün Bulundu!\n\nÜrün: ${productInfo.name}\nMarka: ${productInfo.brand}\nKategori: ${productInfo.category}`)
+      } else {
+        alert(`📦 Barkod Okundu!\n\nKod: ${codeText}\nFormat: ${formatName}\n\nÜrün bilgileri bulunamadı.`)
+      }
+    } catch (error) {
+      console.error('Ürün bilgisi alınamadı:', error)
+      alert(`📦 Barkod Okundu!\n\nKod: ${codeText}\nFormat: ${formatName}\n\nÜrün bilgileri alınamadı.`)
+    }
+  }
+
+  const getProductInfo = async (barcode: string) => {
+    try {
+      // Open Food Facts API (ücretsiz)
+      const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`)
+      const data = await response.json()
+      
+      if (data.status === 1 && data.product) {
+        const product = data.product
+        return {
+          name: product.product_name || 'Bilinmeyen Ürün',
+          brand: product.brands || 'Bilinmeyen Marka',
+          category: product.categories || 'Bilinmeyen Kategori',
+          image: product.image_url || null
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('API hatası:', error)
+      return null
+    }
   }
 
   const openUrl = (url: string) => {
