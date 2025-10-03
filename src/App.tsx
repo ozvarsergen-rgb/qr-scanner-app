@@ -62,30 +62,24 @@ function App() {
     
     console.log('Temizlenmiş URL:', cleanUrl)
     
-    // Güçlü yönlendirme - birden fazla yöntem
+    // Aynı sekmede açma - geri butonu çalışır
     try {
-      // Yöntem 1: location.replace (geri butonu çalışmaz)
-      window.location.replace(cleanUrl)
+      // Yöntem 1: location.href (geri butonu çalışır)
+      window.location.href = cleanUrl
     } catch (error1) {
-      console.log('location.replace failed, trying location.href')
+      console.log('location.href failed, trying location.assign')
       try {
-        // Yöntem 2: location.href
-        window.location.href = cleanUrl
+        // Yöntem 2: location.assign (geri butonu çalışır)
+        window.location.assign(cleanUrl)
       } catch (error2) {
-        console.log('location.href failed, trying location.assign')
+        console.log('location.assign failed, trying location.replace')
         try {
-          // Yöntem 3: location.assign
-          window.location.assign(cleanUrl)
+          // Yöntem 3: location.replace (geri butonu çalışmaz)
+          window.location.replace(cleanUrl)
         } catch (error3) {
-          console.log('location.assign failed, trying window.open')
-          try {
-            // Yöntem 4: window.open
-            window.open(cleanUrl, '_self')
-          } catch (error4) {
-            console.error('Tüm yönlendirme yöntemleri başarısız:', error4)
-            // Son çare: kullanıcıya URL'yi göster
-            alert(`QR kod içeriği: ${url}\n\nBu URL'yi kopyalayıp tarayıcıya yapıştırabilirsiniz.`)
-          }
+          console.error('Tüm yönlendirme yöntemleri başarısız:', error3)
+          // Son çare: kullanıcıya URL'yi göster
+          alert(`QR kod içeriği: ${url}\n\nBu URL'yi kopyalayıp tarayıcıya yapıştırabilirsiniz.`)
         }
       }
     }
