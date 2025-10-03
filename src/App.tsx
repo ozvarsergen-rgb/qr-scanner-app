@@ -1,60 +1,54 @@
 import { useState, useRef, useEffect } from 'react'
-import { BrowserMultiFormatReader, NotFoundException } from '@zxing/library'
+import QrScanner from 'qr-scanner'
 import './App.css'
 
 function App() {
   const [isScanning, setIsScanning] = useState(false)
   const [error, setError] = useState('')
   const videoRef = useRef<HTMLVideoElement>(null)
-  const readerRef = useRef<BrowserMultiFormatReader | null>(null)
+  const scannerRef = useRef<QrScanner | null>(null)
 
   useEffect(() => {
-    readerRef.current = new BrowserMultiFormatReader()
-    
     return () => {
-      if (readerRef.current) {
-        readerRef.current.reset()
+      if (scannerRef.current) {
+        scannerRef.current.destroy()
       }
     }
   }, [])
 
   const startScan = async () => {
-    if (!videoRef.current || !readerRef.current) return
+    if (!videoRef.current) return
 
     try {
       setError('')
       setIsScanning(true)
       
-      await readerRef.current.decodeFromVideoDevice(
-        null,
+      scannerRef.current = new QrScanner(
         videoRef.current,
-        (result, error) => {
-          if (result) {
-            console.log('Kod okundu:', result.getText())
-            console.log('Kod formatı:', result.getBarcodeFormat())
-            setIsScanning(false)
-            readerRef.current?.reset()
-            
-            // QR kod mu barkod mu kontrol et
-            const codeText = result.getText()
-            const format = result.getBarcodeFormat().toString()
-            
-            if (format.includes('QR_CODE')) {
-              // QR kod - URL'e yönlendir
-              openUrl(codeText)
-            } else {
-              // Barkod - ürün bilgilerini göster
-              showBarcodeInfo(codeText, format)
-            }
-          }
+        (result) => {
+          console.log('Kod okundu:', result.data)
+          setIsScanning(false)
+          scannerRef.current?.stop()
           
-          if (error && !(error instanceof NotFoundException)) {
-            console.error('Tarama hatası:', error)
-            setError('Kod okunamadı, tekrar deneyin')
-            setIsScanning(false)
+          // QR kod mu barkod mu kontrol et
+          const codeText = result.data
+          
+          if (isUrl(codeText)) {
+            // QR kod - URL'e yönlendir
+            openUrl(codeText)
+          } else {
+            // Barkod - ürün bilgilerini göster
+            showBarcodeInfo(codeText, 'BARKOD')
           }
+        },
+        {
+          highlightScanRegion: false,
+          highlightCodeOutline: false,
+          maxScansPerSecond: 3
         }
       )
+      
+      await scannerRef.current.start()
     } catch (err) {
       console.error('Hata:', err)
       setError('Kamera erişimi sağlanamadı')
@@ -62,9 +56,18 @@ function App() {
     }
   }
 
+  const isUrl = (text: string) => {
+    try {
+      new URL(text)
+      return true
+    } catch {
+      return text.startsWith('http://') || text.startsWith('https://')
+    }
+  }
+
   const stopScan = () => {
-    if (readerRef.current) {
-      readerRef.current.reset()
+    if (scannerRef.current) {
+      scannerRef.current.stop()
     }
     setIsScanning(false)
   }
