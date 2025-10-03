@@ -4,7 +4,6 @@ import './App.css'
 
 function App() {
   const [isScanning, setIsScanning] = useState(false)
-  const [result, setResult] = useState('')
   const [error, setError] = useState('')
   const videoRef = useRef<HTMLVideoElement>(null)
   const scannerRef = useRef<QrScanner | null>(null)
@@ -20,7 +19,6 @@ function App() {
         videoRef.current,
         (result) => {
           console.log('QR okundu:', result.data)
-          setResult(result.data)
           setIsScanning(false)
           scannerRef.current?.stop()
           
@@ -117,13 +115,6 @@ function App() {
           </div>
         )}
 
-        {result && (
-          <div className="result">
-            <h3>Okunan QR Kod:</h3>
-            <p>{result}</p>
-            <p className="success">Yönlendiriliyor...</p>
-          </div>
-        )}
       </div>
     </div>
   )
