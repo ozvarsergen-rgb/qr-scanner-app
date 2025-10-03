@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import QrScanner from 'qr-scanner'
+import { BrowserMultiFormatReader, NotFoundException } from '@zxing/library'
 import { QrCode, Camera, History, Copy, ExternalLink } from 'lucide-react'
 import './App.css'
 
@@ -15,7 +15,7 @@ function App() {
   const [scanResults, setScanResults] = useState<ScanResult[]>([])
   const [currentResult, setCurrentResult] = useState<string>('')
   const [error, setError] = useState<string>('')
-  const qrScannerRef = useRef<QrScanner | null>(null)
+  const readerRef = useRef<BrowserMultiFormatReader | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
@@ -28,24 +28,33 @@ function App() {
           timestamp: new Date(result.timestamp)
         }))
         setScanResults(parsed)
-      } catch (e) {
-        console.error('Failed to load saved results:', e)
+      } catch (error) {
+        console.error('Error loading saved results:', error)
       }
     }
 
+    // Initialize ZXing reader
+    readerRef.current = new BrowserMultiFormatReader()
+
     return () => {
-      if (qrScannerRef.current) {
-        qrScannerRef.current.destroy()
+      if (readerRef.current) {
+        readerRef.current.reset()
       }
     }
   }, [])
 
   const detectContentType = (text: string): ScanResult['type'] => {
-    if (text.startsWith('http://') || text.startsWith('https://')) return 'url'
-    if (text.includes('@') && text.includes('.')) return 'email'
-    if (/^\+?[\d\s\-\(\)]+$/.test(text.replace(/\s/g, ''))) return 'phone'
-    if (text.startsWith('WIFI:')) return 'wifi'
-    return 'text'
+    if (text.startsWith('http://') || text.startsWith('https://')) {
+      return 'url'
+    } else if (text.includes('@') && text.includes('.')) {
+      return 'email'
+    } else if (text.startsWith('tel:') || /^\+?[\d\s\-\(\)]+$/.test(text)) {
+      return 'phone'
+    } else if (text.startsWith('WIFI:')) {
+      return 'wifi'
+    } else {
+      return 'text'
+    }
   }
 
   const startScanning = async () => {
@@ -82,11 +91,11 @@ function App() {
       videoRef.current.srcObject = stream
       await videoRef.current.play()
       
-      // QR Scanner'ı başlat
-      qrScannerRef.current = new QrScanner(
-        videoRef.current,
-        (result) => {
-          const text = result.data
+      // QR kod tarama başlat
+      await readerRef.current!.decodeFromVideoDevice(null, videoRef.current, (result, error) => {
+        if (result) {
+          console.log('QR kod okundu:', result.getText())
+          const text = result.getText()
           const newResult: ScanResult = {
             id: Date.now().toString(),
             text,
@@ -102,21 +111,13 @@ function App() {
           })
           
           setIsScanning(false)
-          qrScannerRef.current?.stop()
+          readerRef.current?.reset()
           stream.getTracks().forEach(track => track.stop())
-        },
-        {
-          onDecodeError: (error) => {
-            // QR kod bulunamadı, taramaya devam et
-            console.log('QR kod bulunamadı:', error)
-          },
-          highlightScanRegion: true,
-          highlightCodeOutline: true,
-          maxScansPerSecond: 5
         }
-      )
-      
-      await qrScannerRef.current.start()
+        if (error && !(error instanceof NotFoundException)) {
+          console.log('QR kod bulunamadı:', error)
+        }
+      })
       
     } catch (err) {
       console.error('Kamera hatası:', err)
@@ -140,8 +141,8 @@ function App() {
   }
 
   const stopScanning = () => {
-    if (qrScannerRef.current) {
-      qrScannerRef.current.stop()
+    if (readerRef.current) {
+      readerRef.current.reset()
     }
     
     // Video stream'i durdur
@@ -152,15 +153,15 @@ function App() {
     }
     
     setIsScanning(false)
-    setError('')
   }
 
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text)
       alert('Panoya kopyalandı!')
-    } catch (err) {
-      console.error('Kopyalama hatası:', err)
+    } catch (error) {
+      console.error('Kopyalama hatası:', error)
+      alert('Kopyalama başarısız!')
     }
   }
 
@@ -170,35 +171,46 @@ function App() {
 
   const clearHistory = () => {
     setScanResults([])
+    setCurrentResult('')
     localStorage.removeItem('qr-scan-results')
   }
 
   const getTypeIcon = (type: ScanResult['type']) => {
     switch (type) {
-      case 'url': return <ExternalLink size={16} />
-      case 'email': return <span>📧</span>
-      case 'phone': return <span>📞</span>
-      case 'wifi': return <span>📶</span>
-      default: return <span>📄</span>
+      case 'url':
+        return <ExternalLink size={16} />
+      case 'email':
+        return <Copy size={16} />
+      case 'phone':
+        return <Copy size={16} />
+      case 'wifi':
+        return <Copy size={16} />
+      default:
+        return <Copy size={16} />
     }
   }
 
   return (
     <div className="app">
-      <header className="app-header">
-        <div className="header-content">
-          <QrCode size={32} />
-          <h1>QR Kod Okuyucu</h1>
-        </div>
-      </header>
+      <div className="app-main">
+        <header className="header">
+          <div className="header-content">
+            <QrCode size={32} />
+            <h1>QR Kod Okuyucu</h1>
+          </div>
+        </header>
 
-      <main className="app-main">
-        <div className="scanner-section">
+        <main className="scanner-section">
           <div className="video-container">
-            <video ref={videoRef} className="scanner-video" />
+            <video
+              ref={videoRef}
+              className="scanner-video"
+              playsInline
+              muted
+            />
             {!isScanning && (
               <div className="scanner-placeholder">
-                <Camera size={64} />
+                <Camera size={48} />
                 <p>QR kodu okumak için başlat butonuna basın</p>
               </div>
             )}
@@ -206,18 +218,13 @@ function App() {
 
           <div className="scanner-controls">
             {!isScanning ? (
-              <button 
-                className="scan-button start"
-                onClick={startScanning}
-              >
+              <button className="scan-button" onClick={startScanning}>
                 <Camera size={20} />
                 Taramayı Başlat
               </button>
             ) : (
-              <button 
-                className="scan-button stop"
-                onClick={stopScanning}
-              >
+              <button className="scan-button stop" onClick={stopScanning}>
+                <Camera size={20} />
                 Taramayı Durdur
               </button>
             )}
@@ -231,7 +238,7 @@ function App() {
 
           {currentResult && (
             <div className="current-result">
-              <h3>Sonuç:</h3>
+              <h3>Son Sonuç:</h3>
               <div className="result-content">
                 <p>{currentResult}</p>
                 <div className="result-actions">
@@ -255,36 +262,35 @@ function App() {
               </div>
             </div>
           )}
-        </div>
+        </main>
 
-        {scanResults.length > 0 && (
-          <div className="history-section">
-            <div className="history-header">
-              <h2>
-                <History size={20} />
-                Tarama Geçmişi
-              </h2>
-              <button 
-                className="clear-button"
-                onClick={clearHistory}
-              >
-                Temizle
-              </button>
-            </div>
+        <section className="history-section">
+          <div className="history-header">
+            <h2>
+              <History size={24} />
+              Tarama Geçmişi
+            </h2>
+            <button className="clear-button" onClick={clearHistory}>
+              Temizle
+            </button>
+          </div>
 
+          {scanResults.length === 0 ? (
+            <p className="no-results">Henüz QR kod taraması yapılmadı.</p>
+          ) : (
             <div className="results-list">
               {scanResults.map((result) => (
                 <div key={result.id} className="result-item">
-                  <div className="result-type">
-                    {getTypeIcon(result.type)}
-                    <span className="type-label">{result.type}</span>
-                  </div>
                   <div className="result-text">
                     {result.text}
                   </div>
                   <div className="result-meta">
-                    <span className="timestamp">
-                      {result.timestamp.toLocaleString('tr-TR')}
+                    <span className="result-type">
+                      {getTypeIcon(result.type)}
+                      {result.type.toUpperCase()}
+                    </span>
+                    <span className="result-time">
+                      {result.timestamp.toLocaleString()}
                     </span>
                     <div className="result-actions">
                       <button 
@@ -293,7 +299,7 @@ function App() {
                       >
                         <Copy size={14} />
                       </button>
-                      {result.type === 'url' && (
+                      {result.text.startsWith('http') && (
                         <button 
                           className="action-button small"
                           onClick={() => openUrl(result.text)}
@@ -306,9 +312,9 @@ function App() {
                 </div>
               ))}
             </div>
-          </div>
-        )}
-      </main>
+          )}
+        </section>
+      </div>
     </div>
   )
 }
