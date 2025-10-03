@@ -132,6 +132,10 @@ function App() {
       const eanSearch = await fetchEANSearch(barcode)
       if (eanSearch) return eanSearch
       
+      // 7. Türkiye API'leri
+      const turkishAPIs = await fetchTurkishAPIs(barcode)
+      if (turkishAPIs) return turkishAPIs
+      
       return null
     } catch (error) {
       console.error('API hatası:', error)
@@ -267,6 +271,171 @@ function App() {
       return null
     } catch (error) {
       console.error('EAN Search API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchTurkishAPIs = async (barcode: string) => {
+    try {
+      // 1. Migros API (Türkiye)
+      const migros = await fetchMigrosAPI(barcode)
+      if (migros) return migros
+      
+      // 2. CarrefourSA API (Türkiye)
+      const carrefour = await fetchCarrefourAPI(barcode)
+      if (carrefour) return carrefour
+      
+      // 3. A101 API (Türkiye)
+      const a101 = await fetchA101API(barcode)
+      if (a101) return a101
+      
+      // 4. BİM API (Türkiye)
+      const bim = await fetchBIMAPI(barcode)
+      if (bim) return bim
+      
+      // 5. Şok API (Türkiye)
+      const sok = await fetchSokAPI(barcode)
+      if (sok) return sok
+      
+      // 6. Türkiye Ürün Veritabanı
+      const turkishDB = await fetchTurkishDB(barcode)
+      if (turkishDB) return turkishDB
+      
+      return null
+    } catch (error) {
+      console.error('Türk API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchMigrosAPI = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://www.migros.com.tr/api/products/search?q=${barcode}`)
+      const data = await response.json()
+      
+      if (data.products && data.products.length > 0) {
+        const product = data.products[0]
+        return {
+          name: product.name || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.image || null,
+          source: 'Migros (Türkiye)'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Migros API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchCarrefourAPI = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://www.carrefoursa.com/api/products/search?barcode=${barcode}`)
+      const data = await response.json()
+      
+      if (data.products && data.products.length > 0) {
+        const product = data.products[0]
+        return {
+          name: product.name || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.image || null,
+          source: 'CarrefourSA (Türkiye)'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('CarrefourSA API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchA101API = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://www.a101.com.tr/api/products/search?barcode=${barcode}`)
+      const data = await response.json()
+      
+      if (data.products && data.products.length > 0) {
+        const product = data.products[0]
+        return {
+          name: product.name || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.image || null,
+          source: 'A101 (Türkiye)'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('A101 API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchBIMAPI = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://www.bim.com.tr/api/products/search?barcode=${barcode}`)
+      const data = await response.json()
+      
+      if (data.products && data.products.length > 0) {
+        const product = data.products[0]
+        return {
+          name: product.name || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.image || null,
+          source: 'BİM (Türkiye)'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('BİM API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchSokAPI = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://www.sokmarket.com.tr/api/products/search?barcode=${barcode}`)
+      const data = await response.json()
+      
+      if (data.products && data.products.length > 0) {
+        const product = data.products[0]
+        return {
+          name: product.name || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.image || null,
+          source: 'Şok (Türkiye)'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Şok API hatası:', error)
+      return null
+    }
+  }
+
+  const fetchTurkishDB = async (barcode: string) => {
+    try {
+      const response = await fetch(`https://api.turkishproducts.com/v1/products/${barcode}`)
+      const data = await response.json()
+      
+      if (data.product) {
+        const product = data.product
+        return {
+          name: product.name || null,
+          brand: product.brand || null,
+          category: product.category || null,
+          image: product.image || null,
+          source: 'Türkiye Ürün Veritabanı'
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Türk Veritabanı API hatası:', error)
       return null
     }
   }
